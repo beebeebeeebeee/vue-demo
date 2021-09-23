@@ -14,16 +14,17 @@
                 </template>
                 Add Bus
             </n-button>
+        </n-space>
+    </n-card>
             <n-button color="#ff69b4" style="width: 100%" @click="setSelected">
                 <template #icon>
                     <n-icon>
                         <refresh />
                     </n-icon>
                 </template>
-                Refresh
+                Refresh 
+                <span style="padding-left: 1rem; font-size: 12px; "> (Auto refresh in {{refreshCountdown}}s) </span>
             </n-button>
-        </n-space>
-    </n-card>
 
     <n-card size="small" v-for="(item, i) in selected" :key="i" :title="item.route" closable @close="remove(item.raw)">
         <n-steps vertical size="small" :current="item.location.seq" :status="'process'">
@@ -66,6 +67,8 @@ export default {
             formatLeft,
             formatTime,
 
+            refreshCountdown: process.env.VUE_APP_REFRESH_COUNTDOWN,
+
             formData: {
                 route: "",
                 routeStop: "",
@@ -80,6 +83,15 @@ export default {
         DataServices.getStopsList();
 
         this.setSelected();
+
+        setInterval(() => {
+            if (this.refreshCountdown > 0) {
+                this.refreshCountdown--
+            } else {
+                this.setSelected();
+                 this.refreshCountdown = process.env.VUE_APP_REFRESH_COUNTDOWN
+            }
+        }, 1000)
     },
     // the functions for this component
     methods: {
