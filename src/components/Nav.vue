@@ -1,14 +1,15 @@
 <template>
-<n-grid x-gap="12" :cols="2">
+<n-grid x-gap="12" :cols="3">
     <n-gi>
         EZBus
     </n-gi>
-    <n-gi>
+    <n-gi :span="2">
         <n-space justify="end">
+            <n-switch v-model:value="timerSwitch" />
             <n-dropdown trigger="hover" @select="changeLang" :options="options">
-                <n-button disabled>Lang</n-button>
+                <n-button>{{$t("lang")}}</n-button>
             </n-dropdown>
-            <n-button text tag="a" @click="parent.theme = parent.theme? null: parent.darkTheme">{{parent.theme? 'Light Mode': 'Dark Mode'}}</n-button>
+            <n-button text tag="a" @click="parent.theme = parent.theme? null: parent.darkTheme">{{parent.theme? $t('mode.dark'): $t('mode.light')}}</n-button>
         </n-space>
     </n-gi>
 </n-grid>
@@ -21,23 +22,29 @@ export default {
             parent: this.$parent.$parent.$parent.$parent.$parent,
 
             options: [{
-                    label: 'ENG',
-                    key: "brown's hotel, london"
+                    label: 'English',
+                    key: "enUS"
                 },
                 {
-                    label: '亚特兰蒂斯巴哈马，拿骚',
-                    key: 'atlantis nahamas, nassau'
-                },
-                {
-                    label: '比佛利山庄酒店，洛杉矶',
-                    key: 'the beverly hills hotel, los angeles'
+                    label: '中文',
+                    key: 'zhHK'
                 }
             ],
         }
     },
     methods: {
-        changeLang: function () {
-
+        changeLang: function (lang) {
+            this.$store.commit("setLang", lang)
+        }
+    },
+    computed: {
+        timerSwitch: {
+            get() {
+                return this.$store.state.timerSwitch;
+            },
+            set(val) {
+                return this.$store.commit("setTimerSwitch", val)
+            }
         }
     }
 }

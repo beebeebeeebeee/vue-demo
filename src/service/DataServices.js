@@ -28,6 +28,7 @@ export default new (class {
         if (busList[e.route][e.bound] == null) busList[e.route][e.bound] = {}
         if (busList[e.route][e.bound][e.service_type] == null) busList[e.route][e.bound][e.service_type] = []
         e.name_tc = stopNameList.find(k => k.stop == e.stop).name_tc
+        e.name_en = stopNameList.find(k => k.stop == e.stop).name_en
         busList[e.route][e.bound][e.service_type].push(e)
       });
 

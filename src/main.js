@@ -9,6 +9,9 @@ import App from './App.vue'
 // @/sth the @/ is mena src/
 import store from "@/store"
 
+//import i18n for multiple language
+import i18n from "@/i18n";
+
 // import the ui plugin that you like (or other plugins)
 import naive from 'naive-ui'
 
@@ -19,7 +22,9 @@ const app = createApp(App)
 
 // use the plugins
 app.use(store)
+app.use(i18n)
 app.use(naive)
 
 // start! (I don't know how to explain)
 app.mount('#app')
+

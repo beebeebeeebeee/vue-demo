@@ -1,0 +1,10 @@
+{
+    "lang": "中文",
+
+    "mode.dark": "深色模式",
+    "mode.light": "浅色模式",
+
+    "add.bus": "新增巴士",
+    "refresh": "重新整理",
+    "refresh.auto": "({refreshCountdown}秒後自動重新整理)"
+}

@@ -5,7 +5,7 @@
     <n-space vertical size="large">
         <n-layout>
             <n-layout-header>
-               <Nav/>
+                <Nav />
             </n-layout-header>
             <n-layout-content content-style="padding: .5rem;">
                 <!-- this is my custom component -->
@@ -35,7 +35,8 @@ import {
 export default {
     // import my custom component to use inside current components (the top template area)
     components: {
-        Bus,Nav
+        Bus,
+        Nav
     },
     // this place is define the data (state) on this component
     data() {

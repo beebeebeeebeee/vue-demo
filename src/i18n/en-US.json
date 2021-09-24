@@ -1,0 +1,10 @@
+{
+    "lang": "English",
+
+    "mode.dark": "Dark Mode",
+    "mode.light": "Light Mode",
+
+    "add.bus": "Add Bus",
+    "refresh": "Refresh",
+    "refresh.auto": "(Auto refresh in {refreshCountdown}s)"
+}

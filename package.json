@@ -11,9 +11,11 @@
     "@vicons/ionicons5": "^0.11.0",
     "axios": "^0.21.4",
     "core-js": "^3.6.5",
+    "localforage": "^1.10.0",
     "naive-ui": "^2.19.1",
     "register-service-worker": "^1.7.1",
     "vue": "^3.0.0",
+    "vue-i18n": "^9.1.7",
     "vuex": "^4.0.2",
     "vuex-persistedstate": "^4.0.0"
   },

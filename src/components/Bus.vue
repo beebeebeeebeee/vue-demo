@@ -12,23 +12,24 @@
                         <add />
                     </n-icon>
                 </template>
-                Add Bus
+                {{ $t("add.bus") }}
             </n-button>
         </n-space>
     </n-card>
-            <n-button color="#ff69b4" style="width: 100%" @click="setSelected">
-                <template #icon>
-                    <n-icon>
-                        <refresh />
-                    </n-icon>
-                </template>
-                Refresh 
-                <span style="padding-left: 1rem; font-size: 12px; "> (Auto refresh in {{refreshCountdown}}s) </span>
-            </n-button>
-
+    <n-button color="#ff69b4" style="width: 100%" @click="setSelected">
+        <template #icon>
+            <n-icon>
+                <refresh />
+            </n-icon>
+        </template>
+        {{ $t("refresh") }}
+        <span style="padding-left: 1rem; font-size: 12px">
+            {{ $t("refresh.auto", { refreshCountdown }) }}
+        </span>
+    </n-button>
     <n-card size="small" v-for="(item, i) in selected" :key="i" :title="item.route" closable @close="remove(item.raw)">
         <n-steps vertical size="small" :current="item.location.seq" :status="'process'">
-            <n-step :title="prev.label" :description="prev.eta[0]?formatLeft( prev.eta[0].left): 'No Bus'" v-for="(prev, j) in item.prev2" :key="j" />
+            <n-step :title="prev.label" :description="prev.eta[0] ? formatLeft(prev.eta[0].left) : 'No Bus'" v-for="(prev, j) in item.prev2" :key="j" />
             <n-step :title="item.stop">
                 <template #default>
                     <n-timeline>
@@ -60,14 +61,18 @@ import {
 export default {
     components: {
         Add,
-        Refresh
+        Refresh,
     },
     data() {
         return {
             formatLeft,
             formatTime,
+            lang: {
+                zhHK: "tc",
+                enUS: "en",
+            },
 
-            refreshCountdown: process.env.VUE_APP_REFRESH_COUNTDOWN,
+            refreshCountdown: 0,
 
             formData: {
                 route: "",
@@ -82,16 +87,15 @@ export default {
         DataServices.getBusList();
         DataServices.getStopsList();
 
-        this.setSelected();
-
-        setInterval(() => {
-            if (this.refreshCountdown > 0) {
-                this.refreshCountdown--
-            } else {
-                this.setSelected();
-                 this.refreshCountdown = process.env.VUE_APP_REFRESH_COUNTDOWN
+        this.timer = setInterval(() => {
+            if (this.timerSwitch) {
+                if (this.refreshCountdown > 0) {
+                    this.refreshCountdown--;
+                } else {
+                    this.setSelected();
+                }
             }
-        }, 1000)
+        }, 1000);
     },
     // the functions for this component
     methods: {
@@ -102,7 +106,10 @@ export default {
                 for (
                     let i = this.formData.routeStop.seq - 1; this.formData.routeStop.seq - 3 < i && i > 0; i--
                 ) {
-                    added.prev2 = [this.stopsList.find((e) => e.value.seq == i), ...added.prev2]
+                    added.prev2 = [
+                        this.stopsList.find((e) => e.value.seq == i),
+                        ...added.prev2,
+                    ];
                 }
                 this.$store.commit("addSelected", added);
             }
@@ -113,6 +120,7 @@ export default {
             this.setSelected();
         },
         setSelected: async function () {
+            this.refreshCountdown = process.env.VUE_APP_REFRESH_COUNTDOWN;
             let a = [];
 
             for (let j in this.$store.state.selected) {
@@ -121,7 +129,9 @@ export default {
                 let allLeft = [];
                 for (let m in e.prev2) {
                     let eta = await DataServices.getETA(e.prev2[m].value);
-                    allLeft.push(eta[0] ? eta[0].left > 0 ? eta[0].left : 99999999 : 99999999);
+                    allLeft.push(
+                        eta[0] ? (eta[0].left > 0 ? eta[0].left : 99999999) : 99999999
+                    );
                     prev2.push({
                         seq: e.prev2[m].value.seq,
                         label: e.prev2[m].value.label,
@@ -129,7 +139,9 @@ export default {
                     });
                 }
                 let eta = await DataServices.getETA(e.routeStop);
-                allLeft.push(eta[0] ? eta[0].left > 0 ? eta[0].left : 99999999 : 99999999);
+                allLeft.push(
+                    eta[0] ? (eta[0].left > 0 ? eta[0].left : 99999999) : 99999999
+                );
                 a.push({
                     raw: e.routeStop,
                     seq: e.routeStop.seq,
@@ -139,7 +151,7 @@ export default {
                     prev2,
                     location: {
                         allLeft,
-                        seq: allLeft.indexOf(Math.min(...allLeft)) + 1
+                        seq: allLeft.indexOf(Math.min(...allLeft)) + 1,
                     },
                 });
             }
@@ -153,35 +165,39 @@ export default {
             this.formData.routeStop = "";
         },
     },
-    // the data is computed 
+    // the data is computed
     // usually use for getting store state
     // it has get() and set(val) fn
     computed: {
-        busList: {
-            get() {
-                return this.$store.state.busList.map((e) => {
-                    e.label = `${e.route} ${e.orig_tc}>${e.dest_tc}`;
-                    return {
-                        value: e,
-                        label: e.label,
-                    };
-                });
-            },
+        timerSwitch() {
+            return this.$store.state.timerSwitch;
         },
-        stopsList: {
-            get() {
-                if (this.formData.route == "" || this.formData.route == null) return [];
-                let k = this.formData.route;
-                return this.$store.state.stopsList[k.route][k.bound][
-                    k.service_type
-                ].map((e) => {
-                    e.label = `${e.seq}. ${e.name_tc}`;
-                    return {
-                        value: e,
-                        label: e.label,
-                    };
-                });
-            },
+        busList() {
+            return this.$store.state.busList.map((e) => {
+                e.label = `${e.route} ${
+            e["orig_" + this.lang[this.$store.state.lang]]
+          }>${e["dest_" + this.lang[this.$store.state.lang]]}`;
+                return {
+                    value: e,
+                    label: e.label,
+                };
+            });
+        },
+        stopsList() {
+            if (this.formData.route == "" || this.formData.route == null) return [];
+            let k = this.formData.route;
+            return this.$store.state.stopsList[k.route][k.bound][
+                k.service_type
+            ].map((e) => {
+                e.label = `${e.seq}. ${
+            e["name_" + this.lang[this.$store.state.lang]]
+          }`;
+                return {
+                    value: e,
+                    label: e.label,
+                };
+            });
+
         },
     },
 };
