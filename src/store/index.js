@@ -15,6 +15,7 @@ const store = createStore({
   state: {
     lang: "zhHK",
     timerSwitch: true,
+    darkMode: true,
 
     busList: [],
     stopsList: [],
@@ -37,6 +38,9 @@ const store = createStore({
     },
     setTimerSwitch(state, val) {
       state.timerSwitch = val;
+    },
+    invertDarkMode(state) {
+      state.darkMode = !state.darkMode;
     },
     setBusList(state, val) {
       state.busList = val;
@@ -77,13 +81,6 @@ const store = createStore({
     },
   },
 });
-
-(async function() {
-  const state = await localforage.getItem("state");
-  state
-    ? store.replaceState(state)
-    : localforage.setItem("state", JSON.parse(JSON.stringify(store.state)));
-})();
 
 store.watch(
   (state) => state,

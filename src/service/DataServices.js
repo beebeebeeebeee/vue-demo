@@ -9,7 +9,7 @@ export default new (class {
   async getBusList() {
     // check if the data outdated
     if (((new Date() - store.state.lastUpd.busList) / 1000 / 60 / 60 / 24) > 7) {
-      let busList = (await axios.get(process.env.VUE_APP_routesUrl)).data.data;
+      let busList = (await axios.get(process.env.VUE_APP_ROUTES_KMB)).data.data;
       
       // set the data to state
       store.commit("setBusList", busList);
@@ -20,10 +20,10 @@ export default new (class {
   async getStopsList() {
     // check if the data outdated
     if (((new Date() - store.state.lastUpd.stopsList) / 1000 / 60 / 60 / 24) > 7) {
-      let stopNameList = (await axios.get(process.env.VUE_APP_stopsUrl)).data.data;
+      let stopNameList = (await axios.get(process.env.VUE_APP_STOPS_KMB)).data.data;
 
       let busList = {};
-      (await axios.get(process.env.VUE_APP_mappingsUrl)).data.data.forEach(e => {
+      (await axios.get(process.env.VUE_APP_NAME_KMB)).data.data.forEach(e => {
         if (busList[e.route] == null) busList[e.route] = {}
         if (busList[e.route][e.bound] == null) busList[e.route][e.bound] = {}
         if (busList[e.route][e.bound][e.service_type] == null) busList[e.route][e.bound][e.service_type] = []
@@ -39,7 +39,7 @@ export default new (class {
   }
 
   async getETA(e) {
-    let data = (await axios.get(process.env.VUE_APP_ETA + `${e.stop}/${e.route}/${e.service_type}`)).data.data
+    let data = (await axios.get(process.env.VUE_APP_ETA_KMB + `${e.stop}/${e.route}/${e.service_type}`)).data.data
     return data.map(e => {
       let time = new Date(e.eta).getTime()
       let left = time - new Date()

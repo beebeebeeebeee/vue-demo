@@ -55,7 +55,9 @@ import {
 import DataServices from "@/service/DataServices.js";
 import {
     formatLeft,
-    formatTime
+    formatTime,
+    getBusList,
+    getStopsList
 } from "@/service/Utils.js";
 
 export default {
@@ -67,13 +69,8 @@ export default {
         return {
             formatLeft,
             formatTime,
-            lang: {
-                zhHK: "tc",
-                enUS: "en",
-            },
 
-            refreshCountdown: 0,
-
+            refreshCountdown: 1,
             formData: {
                 route: "",
                 routeStop: "",
@@ -173,31 +170,11 @@ export default {
             return this.$store.state.timerSwitch;
         },
         busList() {
-            return this.$store.state.busList.map((e) => {
-                e.label = `${e.route} ${
-            e["orig_" + this.lang[this.$store.state.lang]]
-          }>${e["dest_" + this.lang[this.$store.state.lang]]}`;
-                return {
-                    value: e,
-                    label: e.label,
-                };
-            });
+            return getBusList()
         },
         stopsList() {
             if (this.formData.route == "" || this.formData.route == null) return [];
-            let k = this.formData.route;
-            return this.$store.state.stopsList[k.route][k.bound][
-                k.service_type
-            ].map((e) => {
-                e.label = `${e.seq}. ${
-            e["name_" + this.lang[this.$store.state.lang]]
-          }`;
-                return {
-                    value: e,
-                    label: e.label,
-                };
-            });
-
+            return getStopsList( this.formData.route)
         },
     },
 };

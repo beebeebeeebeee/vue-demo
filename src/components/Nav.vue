@@ -9,7 +9,7 @@
             <n-dropdown trigger="hover" @select="changeLang" :options="options">
                 <n-button>{{$t("lang")}}</n-button>
             </n-dropdown>
-            <n-button text tag="a" @click="parent.theme = parent.theme? null: parent.darkTheme">{{parent.theme? $t('mode.dark'): $t('mode.light')}}</n-button>
+            <n-button text tag="a" @click="$store.commit('invertDarkMode')">{{parent.theme? $t('mode.dark'): $t('mode.light')}}</n-button>
         </n-space>
     </n-gi>
 </n-grid>

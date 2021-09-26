@@ -25,6 +25,10 @@ app.use(store)
 app.use(i18n)
 app.use(naive)
 
-// start! (I don't know how to explain)
-app.mount('#app')
+//wait for localforage
+import {getLocalForage} from "@/service/Utils.js"
+getLocalForage().then(()=>{
+    // start! (I don't know how to explain)
+    app.mount('#app')
+})
 
