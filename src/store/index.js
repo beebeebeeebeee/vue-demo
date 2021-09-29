@@ -13,11 +13,13 @@ import localforage from "localforage";
 const store = createStore({
   // the state
   state: {
+    version: "1A0004",
+
     lang: "zhHK",
     timerSwitch: true,
     darkMode: true,
-
-    busList: [],
+    
+    busList: {},
     stopsList: [],
 
     lastUpd: {

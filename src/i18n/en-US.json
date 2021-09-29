@@ -4,6 +4,8 @@
     "mode.dark": "Dark Mode",
     "mode.light": "Light Mode",
 
+    "loading": "Loading",
+
     "add.bus": "Add Bus",
     "refresh": "Refresh",
     "refresh.auto": "(Auto refresh in {refreshCountdown}s)"

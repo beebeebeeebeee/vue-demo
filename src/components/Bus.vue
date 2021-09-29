@@ -29,11 +29,11 @@
     </n-button>
     <n-card size="small" v-for="(item, i) in selected" :key="i" :title="item.route" closable @close="remove(item.raw)">
         <n-steps vertical size="small" :current="item.location.seq" :status="'process'">
-            <n-step :title="prev.label" :description="prev.eta[0] ? formatLeft(prev.eta[0].left) : 'No Bus'" v-for="(prev, j) in item.prev2" :key="j" />
+            <n-step :title="prev.label" :description="prev.eta[0] ? formatLeft(prev.eta[0].left - refreshCountup) : 'No Bus'" v-for="(prev, j) in item.prev2" :key="j" />
             <n-step :title="item.stop">
                 <template #default>
                     <n-timeline>
-                        <n-timeline-item type="success" :title="formatLeft(eta.left)" :time="formatTime(eta.time)" v-for="(eta, k) in item.eta" :key="k" />
+                        <n-timeline-item type="success" :title="formatLeft(eta.left - refreshCountup)" :time="formatTime(eta.time)" v-for="(eta, k) in item.eta" :key="k" />
                     </n-timeline>
                 </template>
             </n-step>
@@ -70,7 +70,9 @@ export default {
             formatLeft,
             formatTime,
 
-            refreshCountdown: 1,
+            refreshCountdown: process.env.VUE_APP_REFRESH_COUNTDOWN,
+            refreshCountup: 0,
+
             formData: {
                 route: "",
                 routeStop: "",
@@ -81,10 +83,14 @@ export default {
     },
     // do when this component has loaded
     async mounted() {
-        DataServices.getBusList();
-        DataServices.getStopsList();
+        await DataServices.getBusList();
+        await DataServices.getStopsList();
+        this.$parent.$parent.$parent.$parent.$parent.loading.close()
+
+        this.setSelected();
 
         this.timer = setInterval(() => {
+            this.refreshCountup += 1000;
             if (this.timerSwitch) {
                 if (this.refreshCountdown > 0) {
                     this.refreshCountdown--;
@@ -117,7 +123,6 @@ export default {
             this.setSelected();
         },
         setSelected: async function () {
-            this.refreshCountdown = process.env.VUE_APP_REFRESH_COUNTDOWN;
             let a = [];
 
             for (let j in this.$store.state.selected) {
@@ -154,6 +159,8 @@ export default {
             }
 
             this.selected = a;
+            this.refreshCountup = 0;
+            this.refreshCountdown = process.env.VUE_APP_REFRESH_COUNTDOWN;
         },
     },
     // is the key (formData.route in this case) has changes do the function
@@ -174,7 +181,7 @@ export default {
         },
         stopsList() {
             if (this.formData.route == "" || this.formData.route == null) return [];
-            return getStopsList( this.formData.route)
+            return getStopsList(this.formData.route)
         },
     },
 };

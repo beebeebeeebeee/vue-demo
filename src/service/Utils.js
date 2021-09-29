@@ -4,6 +4,8 @@
 // import the store because I want to set the data to state and localstorage
 import store from "@/store";
 
+import DataServices from "./DataServices";
+
 //const
 const lang = {
   zhHK: "tc",
@@ -27,21 +29,36 @@ export const formatTime = (time) => {
 };
 
 export const getBusList = () => {
-  return store.state.busList.map((e) => {
-    e.label = `${e.route} ${e["orig_" + lang[store.state.lang]]}>${
-      e["dest_" + lang[store.state.lang]]
-    }`;
+  return Object.entries(store.state.busList).map(([co, val]) => {
     return {
-      value: e,
-      label: e.label,
+      type: "group",
+      label: co,
+      key: co,
+      children: val.map((e) => {
+        e.label = `[${e.co}] ${e.route} ${e["orig_" + lang[store.state.lang]]}>${
+          e["dest_" + lang[store.state.lang]]
+        }`;
+        return {
+          value: e,
+          label: e.label,
+        };
+      }),
     };
   });
 };
 
 export const getStopsList = (route) => {
-  return store.state.stopsList[route.route][route.bound][
-    route.service_type
-  ].map((e) => {
+  let result = [];
+  try {
+    result =
+      store.state.stopsList[route.co.toLocaleLowerCase()][route.route][
+        route.bound
+      ][route.service_type];
+  } catch (e) {
+    console.log("JJ", e);
+    DataServices.getSingleStopsList(route);
+  }
+  return result.map((e) => {
     e.label = `${e.seq}. ${e["name_" + lang[store.state.lang]]}`;
     return {
       value: e,
@@ -50,10 +67,40 @@ export const getStopsList = (route) => {
   });
 };
 
+export const path = (main, last, ...object) => {
+  let prev = main;
+  for (let index in object) {
+    let each = object[index];
+    if (prev[each] == null) {
+      if (index == object.length - 1) {
+        prev[each] = last;
+      } else {
+        prev[each] = {};
+      }
+    }
+    prev = prev[each];
+  }
+  return main;
+};
+
+export const merge = (left, right) => {
+  let arr = [];
+  while (left.length && right.length) {
+    if (left.length >= right.length) {
+      arr.push(left.shift());
+    } else {
+      arr.push(right.shift());
+    }
+  }
+  return [...arr, ...left, ...right];
+};
+
 import localforage from "localforage";
-export const getLocalForage =  async () => {
+export const getLocalForage = async () => {
   const state = await localforage.getItem("state");
-  state
-    ? store.replaceState(state)
-    : localforage.setItem("state", JSON.parse(JSON.stringify(store.state)));
-}
+  if (state && state.version == store.state.version) {
+    store.replaceState(state);
+  } else {
+    localforage.setItem("state", JSON.parse(JSON.stringify(store.state)));
+  }
+};
