@@ -14,8 +14,6 @@ import i18n from "@/i18n";
 
 // import the ui plugin that you like (or other plugins)
 import naive from "naive-ui";
-import ElementPlus from "element-plus";
-import "element-plus/dist/index.css";
 
 import "./registerServiceWorker";
 
@@ -29,7 +27,6 @@ getLocalForage().then(() => {
   app.use(store);
   app.use(i18n);
   app.use(naive);
-  app.use(ElementPlus);
 
   // start! (I don't know how to explain)
   app.mount("#app");

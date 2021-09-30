@@ -24,6 +24,8 @@
 import Bus from "@/components/Bus.vue";
 import Nav from "@/components/Nav.vue";
 
+import { ElLoading } from 'element-plus'
+
 // this is the stuff for naive-ui darkTheme!
 import {
     darkTheme
@@ -45,7 +47,7 @@ export default {
         };
     },
     mounted() {
-        this.loading = this.$loading({
+        this.loading = ElLoading.service({
             lock: true,
             text: this.$t('loading'),
             spinner: "el-icon-loading",
