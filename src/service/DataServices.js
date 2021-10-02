@@ -28,6 +28,7 @@ export default new (class {
         await axios.get(process.env.VUE_APP_ROUTES_NWFB)
       ).data.data.map((e) => {
         e.bound = "O";
+        e.service_type = "1";
         return e;
       });
       let nwfbIn = JSON.parse(JSON.stringify(nwfbOut)).map((e) => {
@@ -43,6 +44,7 @@ export default new (class {
         await axios.get(process.env.VUE_APP_ROUTES_CTB)
       ).data.data.map((e) => {
         e.bound = "O";
+        e.service_type = "1";
         return e;
       });
       let ctbIn = JSON.parse(JSON.stringify(ctbOut)).map((e) => {
@@ -77,14 +79,15 @@ export default new (class {
         ["name_tc", "name_sc", "name_en"].forEach((ln) => {
           e[ln] = stopNameList.find((k) => k.stop == e.stop)[ln];
         });
+        e.co = "KMB";
         busList[e.route][e.bound][e.service_type].push(e);
       });
 
       // set the data to state
-      store.commit("setStopsList", { kmb: busList, nwfb: [], ctb: [] });
+      store.commit("setStopsList", { kmb: busList, nwfb: {}, ctb: {} });
       store.commit("setLastUpdStopsList", new Date());
     }
-    return null
+    return null;
   }
 
   async getSingleStopsList(route) {
@@ -102,7 +105,6 @@ export default new (class {
         let name = (
           await axios.get(process.env["VUE_APP_NAME_" + route.co] + e.stop)
         ).data.data;
-        console.log(name);
         ["name_tc", "name_sc", "name_en"].forEach((ln) => {
           e[ln] = name[ln];
         });
@@ -111,33 +113,45 @@ export default new (class {
     );
 
     // set the data to state
-    let stateList = store.state.stopList[route.co.toLocaleLowerCase()];
-    if (stateList[route.route] == null) stateList[route.route] = {};
-    if (stateList[route.route][route.bound] == null)
-      stateList[route.route][route.bound] = {};
-    if (stateList[route.route][route.bound][route.service_type] == null)
-      stateList[route.route][route.bound][route.service_type] = routeStop;
-    store.state.stopList[route.co.toLocaleLowerCase()] = stateList;
+    let stateList = store.state.stopsList[route.co.toLocaleLowerCase()];
+
+    path(stateList, routeStop, route.route, route.bound, route.service_type);
+    store.state.stopsList[route.co.toLocaleLowerCase()] = stateList;
     store.commit("setLastUpdStopsList", new Date());
 
     return routeStop;
   }
 
   async getETA(e) {
-    let data = (
-      await axios.get(
-        process.env.VUE_APP_ETA_KMB + `${e.stop}/${e.route}/${e.service_type}`
-      )
-    ).data.data;
-    return data.map((e) => {
-      let time = new Date(e.eta).getTime();
-      let left = time - new Date();
-      let message = left < 0 ? -1 : left < 60000 ? 1 : 0;
-      return {
-        time,
-        left,
-        message,
-      };
-    });
+    let api = "";
+    switch (e.co) {
+      case "KMB":
+        api =
+          process.env.VUE_APP_ETA_KMB +
+          `${e.stop}/${e.route}/${e.service_type}`;
+        break;
+      case "NWFB":
+        api = process.env.VUE_APP_ETA_NWFB + `${e.stop}/${e.route}`;
+        break;
+      case "CTB":
+        api = process.env.VUE_APP_ETA_CTB + `${e.stop}/${e.route}`;
+        break;
+    }
+    let data = (await axios.get(api)).data.data;
+    return data
+      .filter((f) => {
+        return (f.dir == e.bound || f.dir == e.dir);
+      })
+      .map((e) => {
+        let time = new Date(e.eta).getTime();
+        let left = time - new Date();
+        let message = left < 0 ? -1 : left < 60000 ? 1 : 0;
+        return {
+          co: e.co,
+          time,
+          left,
+          message,
+        };
+      });
   }
 })();

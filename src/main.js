@@ -15,10 +15,13 @@ import i18n from "@/i18n";
 // import the ui plugin that you like (or other plugins)
 import naive from "naive-ui";
 
+import 'element-plus/dist/index.css'
 import "./registerServiceWorker";
 
 //wait for localforage
 import { getLocalForage } from "@/service/Utils.js";
+
+import './registerServiceWorker'
 getLocalForage().then(() => {
   // set app by createApp (I don't know how to explain)
   const app = createApp(App);

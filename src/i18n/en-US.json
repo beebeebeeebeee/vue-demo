@@ -6,7 +6,18 @@
 
     "loading": "Loading",
 
+    "r1.route": "Please select a bus route.",
+    "r1.stop": "Please select a bus stop.",
+    "r2.route": "Please select a multi company bus route.",
+    "r2.stop": "lease select a multi company bus stop.",
+
     "add.bus": "Add Bus",
     "refresh": "Refresh",
-    "refresh.auto": "(Auto refresh in {refreshCountdown}s)"
+    "refresh.auto": "(Auto refresh in {refreshCountdown}s)",
+
+    "status.no_bus": "No Bus",
+
+    "KMB": "KMB",
+    "NWFB": "NWFB",
+    "CTB": "CTB"
 }

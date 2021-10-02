@@ -4,8 +4,12 @@
 <n-space vertical>
     <n-card size="small">
         <n-space vertical>
-            <n-select filterable v-model:value="formData.route" :options="busList" />
-            <n-select filterable v-model:value="formData.routeStop" :options="stopsList" />
+            <n-select filterable v-model:value="formData.route" :options="busList" :clearable="true" :placeholder="$t('r1.route')" />
+            <n-select filterable v-model:value="formData.routeStop" :options="stopsList" :clearable="true" :placeholder="$t('r1.stop')" />
+
+            <n-select filterable v-model:value="formData.sameRoute" :options="sameRoute" :clearable="true" v-if="sameRoute.length > 0" :placeholder="$t('r2.route')" />
+            <n-select filterable v-model:value="formData.sameRouteStop" :options="sameRouteStopList" :clearable="true" v-if="sameRoute.length > 0" :placeholder="$t('r2.stop')" />
+
             <n-button color="#8a2be2" style="width: 100%" @click="add">
                 <template #icon>
                     <n-icon>
@@ -27,13 +31,25 @@
             {{ $t("refresh.auto", { refreshCountdown }) }}
         </span>
     </n-button>
-    <n-card size="small" v-for="(item, i) in selected" :key="i" :title="item.route" closable @close="remove(item.raw)">
-        <n-steps vertical size="small" :current="item.location.seq" :status="'process'">
-            <n-step :title="prev.label" :description="prev.eta[0] ? formatLeft(prev.eta[0].left - refreshCountup) : 'No Bus'" v-for="(prev, j) in item.prev2" :key="j" />
+    <n-card size="small" v-for="(item, i) in selected" :key="i" closable @close="remove(i)">
+        <template #header>
+            <span @click="collapse(i)">
+                {{item.route}}
+            </span>
+        </template>
+        <n-steps vertical size="small" :current="item.location.seq" :status="'process'" v-if="!item.collapse">
+            <n-step :title="prev.label" :description="
+            prev.eta[0]
+              ? formatLeft(prev.eta[0].left - refreshCountup)+ ` ${this.$t(prev.eta[0].co)}`
+              : this.$t('status.no_bus')
+          " v-for="(prev, j) in item.prev2" :key="j" />
             <n-step :title="item.stop">
                 <template #default>
+                    <template v-if="item.eta.length==0">
+                        {{this.$t('status.no_bus')}}
+                    </template>
                     <n-timeline>
-                        <n-timeline-item type="success" :title="formatLeft(eta.left - refreshCountup)" :time="formatTime(eta.time)" v-for="(eta, k) in item.eta" :key="k" />
+                        <n-timeline-item type="success" :title="formatLeft(eta.left - refreshCountup)" :time="formatTime(eta.time) + ` ${this.$t(eta.co)}`" v-for="(eta, k) in item.eta" :key="k" />
                     </n-timeline>
                 </template>
             </n-step>
@@ -54,10 +70,12 @@ import {
 } from "@vicons/ionicons5";
 import DataServices from "@/service/DataServices.js";
 import {
+    lang,
     formatLeft,
     formatTime,
     getBusList,
-    getStopsList
+    getStopsList,
+    getSameRoute,
 } from "@/service/Utils.js";
 
 export default {
@@ -73,19 +91,26 @@ export default {
             refreshCountdown: process.env.VUE_APP_REFRESH_COUNTDOWN,
             refreshCountup: 0,
 
+            sameRoute: [],
+
             formData: {
-                route: "",
-                routeStop: "",
+                route: null,
+                routeStop: null,
+                sameRoute: null,
+                sameRouteStop: null,
             },
 
             selected: [],
+
+            loadingBar: null,
         };
     },
     // do when this component has loaded
     async mounted() {
         await DataServices.getBusList();
         await DataServices.getStopsList();
-        this.$parent.$parent.$parent.$parent.$parent.loading.close()
+
+        this.$root.loading.close();
 
         this.setSelected();
 
@@ -105,21 +130,43 @@ export default {
         add: function () {
             if (this.formData.routeStop != "" && this.formData.routeStop != null) {
                 let added = JSON.parse(JSON.stringify(this.formData));
+
+                added.collapse = false
+                added.co = [added.route.co]
+                added.routeStop = [added.routeStop]
+                if (added.sameRoute) {
+                    added.co.push(added.sameRoute.co);
+                    added.routeStop.push(added.sameRouteStop)
+                }
+                added.label_en = `${added.route.route}. ${added.route.orig_en} > ${added.route.dest_en}`
+                added.label_tc = `${added.route.route}. ${added.route.orig_tc} > ${added.route.dest_tc}`
+
                 added.prev2 = [];
                 for (
                     let i = this.formData.routeStop.seq - 1; this.formData.routeStop.seq - 3 < i && i > 0; i--
                 ) {
+                    let toBeAdded = [this.stopsList.find((e) => e.value.seq == i)]
+                    if (added.sameRoute) toBeAdded.push(this.sameRouteStopList.find((e) => e.value.seq == i))
                     added.prev2 = [
-                        this.stopsList.find((e) => e.value.seq == i),
+                        toBeAdded,
                         ...added.prev2,
                     ];
                 }
+
+                delete added.route;
+                delete added.sameRoute;
+                delete added.sameRouteStop;
                 this.$store.commit("addSelected", added);
+                this.formData.route = null;
             }
             this.setSelected();
         },
-        remove: function (item) {
-            this.$store.commit("removeSelected", item);
+        remove: function (index) {
+            this.$store.commit("removeSelected", index);
+            this.setSelected();
+        },
+        collapse: function (index) {
+            this.$store.commit("invertCollapseSelected", index);
             this.setSelected();
         },
         setSelected: async function () {
@@ -129,26 +176,46 @@ export default {
                 let e = this.$store.state.selected[j];
                 let prev2 = [];
                 let allLeft = [];
+                let eta = [];
                 for (let m in e.prev2) {
-                    let eta = await DataServices.getETA(e.prev2[m].value);
+                    let k = e.prev2[m]
+                    let eta = []
+                    if (!e.collapse) {
+                        for (let o in k) {
+                            let oo = k[o]
+                            eta = [...eta, ...await DataServices.getETA(oo.value)]
+                        }
+                    }
+                    eta.sort((a,b)=>{return a.left - b.left})
                     allLeft.push(
                         eta[0] ? (eta[0].left > 0 ? eta[0].left : 99999999) : 99999999
                     );
                     prev2.push({
-                        seq: e.prev2[m].value.seq,
-                        label: e.prev2[m].value.label,
+                        seq: k[0].value.seq,
+                        label: k[0].value.label,
                         eta,
                     });
                 }
-                let eta = await DataServices.getETA(e.routeStop);
+                if (!e.collapse) {
+                    for (let o in e.routeStop) {
+                        let oo = e.routeStop[o]
+                        eta = [...eta, ...await DataServices.getETA(oo)]
+                    }
+                }
+
+                eta.sort((a,b)=>{return a.left - b.left})
                 allLeft.push(
                     eta[0] ? (eta[0].left > 0 ? eta[0].left : 99999999) : 99999999
                 );
+
+                let label = e.co.map(k => "[" + this.$t(k) + "]").join(" ") + ` ${e["label_" + lang[this.$store.state.lang]]}`
+
                 a.push({
+                    collapse: e.collapse,
                     raw: e.routeStop,
-                    seq: e.routeStop.seq,
-                    route: e.route.label,
-                    stop: e.routeStop.label,
+                    seq: e.routeStop[0].seq,
+                    route: label,
+                    stop: e.routeStop[0].label,
                     eta,
                     prev2,
                     location: {
@@ -165,9 +232,15 @@ export default {
     },
     // is the key (formData.route in this case) has changes do the function
     watch: {
-        "formData.route": function () {
-            this.formData.routeStop = "";
+        "formData.route": function (route) {
+            this.formData.routeStop = null;
+            this.sameRoute = getSameRoute(route);
+            this.formData.sameRoute = null;
+            this.formData.sameRouteStop = null;
         },
+        "$store.state.lang": function () {
+            this.setSelected();
+        }
     },
     // the data is computed
     // usually use for getting store state
@@ -177,12 +250,23 @@ export default {
             return this.$store.state.timerSwitch;
         },
         busList() {
-            return getBusList()
+            return getBusList();
         },
         stopsList() {
             if (this.formData.route == "" || this.formData.route == null) return [];
-            return getStopsList(this.formData.route)
+            return getStopsList(this.formData.route);
+        },
+        sameRouteStopList() {
+            if (this.formData.sameRoute == "" || this.formData.sameRoute == null)
+                return [];
+            return getStopsList(this.formData.sameRoute);
         },
     },
 };
 </script>
+
+<style scoped>
+.n-card>>>.n-card__content {
+    padding-bottom: 0 !important;
+}
+</style>

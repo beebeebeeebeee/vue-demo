@@ -1,22 +1,24 @@
 <template>
 <!-- this is the warpper from naive-ui (components that have n- prefix is from naive-ui also) -->
 <!-- for more info abt naive-ui please read: https://www.naiveui.com/ -->
-<n-config-provider :theme="theme">
-    <n-space vertical size="large">
-        <n-layout>
-            <n-layout-header>
-                <Nav />
-            </n-layout-header>
-            <n-layout-content content-style="padding: .5rem;">
-                <!-- this is my custom component -->
-                <Bus />
-            </n-layout-content>
-        </n-layout>
-    </n-space>
+<!-- <n-loading-bar-provider> -->
+    <n-config-provider :theme="theme">
+        <n-space vertical size="large">
+            <n-layout>
+                <n-layout-header>
+                    <Nav />
+                </n-layout-header>
+                <n-layout-content content-style="padding: .5rem;">
+                    <!-- this is my custom component -->
+                    <Bus />
+                </n-layout-content>
+            </n-layout>
+        </n-space>
 
-    <!-- this can help the body also have dark mode -->
-    <n-global-style />
-</n-config-provider>
+        <!-- this can help the body also have dark mode -->
+        <n-global-style />
+    </n-config-provider>
+<!-- </n-loading-bar-provider> -->
 </template>
 
 <script>
@@ -24,12 +26,15 @@
 import Bus from "@/components/Bus.vue";
 import Nav from "@/components/Nav.vue";
 
-import { ElLoading } from 'element-plus'
+import {
+    ElLoading
+} from 'element-plus'
 
 // this is the stuff for naive-ui darkTheme!
 import {
-    darkTheme
+    darkTheme,
 } from "naive-ui";
+
 
 export default {
     // import my custom component to use inside current components (the top template area)
@@ -46,11 +51,10 @@ export default {
             theme: this.$store.state.darkMode ? darkTheme : null,
         };
     },
-    mounted() {
+    created() {
         this.loading = ElLoading.service({
             lock: true,
             text: this.$t('loading'),
-            spinner: "el-icon-loading",
             background: "rgba(0, 0, 0, 0.7)",
         });
     },

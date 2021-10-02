@@ -13,12 +13,12 @@ import localforage from "localforage";
 const store = createStore({
   // the state
   state: {
-    version: "1A0004",
+    version: "1A0005",
 
     lang: "zhHK",
     timerSwitch: true,
     darkMode: true,
-    
+
     busList: {},
     stopsList: [],
 
@@ -70,17 +70,12 @@ const store = createStore({
         state.selected.push(JSON.parse(JSON.stringify(val)));
       }
     },
-    removeSelected(state, val) {
-      state.selected = state.selected.filter(
-        (e) =>
-          !(
-            e.routeStop.route == val.route &&
-            e.routeStop.bound == val.bound &&
-            e.routeStop.service_type == val.service_type &&
-            e.routeStop.seq == val.seq
-          )
-      );
+    removeSelected(state, index) {
+      state.selected.splice(index, 1);
     },
+    invertCollapseSelected(state, index){
+      state.selected[index].collapse = !state.selected[index].collapse;
+    }
   },
 });
 

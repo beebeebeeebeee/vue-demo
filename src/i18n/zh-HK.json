@@ -6,7 +6,18 @@
 
     "loading": "加載中",
 
+    "r1.route": "請選擇巴士路線。",
+    "r1.stop": "請選擇巴士站。",
+    "r2.route": "請選擇多公司巴士路線。",
+    "r2.stop": "請選擇多公司巴士站。",
+
     "add.bus": "新增巴士",
     "refresh": "重新整理",
-    "refresh.auto": "({refreshCountdown}秒後自動重新整理)"
+    "refresh.auto": "({refreshCountdown}秒後自動重新整理)",
+
+    "status.no_bus": "沒有巴士",
+
+    "KMB": "九巴",
+    "NWFB": "新巴",
+    "CTB": "城巴"
 }

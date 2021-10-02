@@ -7,7 +7,7 @@ import store from "@/store";
 import DataServices from "./DataServices";
 
 //const
-const lang = {
+export const lang = {
   zhHK: "tc",
   enUS: "en",
 };
@@ -35,9 +35,9 @@ export const getBusList = () => {
       label: co,
       key: co,
       children: val.map((e) => {
-        e.label = `[${e.co}] ${e.route} ${e["orig_" + lang[store.state.lang]]}>${
-          e["dest_" + lang[store.state.lang]]
-        }`;
+        e.label = `[${e.co}] ${e.route} ${
+          e["orig_" + lang[store.state.lang]]
+        }>${e["dest_" + lang[store.state.lang]]}`;
         return {
           value: e,
           label: e.label,
@@ -48,6 +48,7 @@ export const getBusList = () => {
 };
 
 export const getStopsList = (route) => {
+  if(route == null) return []
   let result = [];
   try {
     result =
@@ -55,7 +56,6 @@ export const getStopsList = (route) => {
         route.bound
       ][route.service_type];
   } catch (e) {
-    console.log("JJ", e);
     DataServices.getSingleStopsList(route);
   }
   return result.map((e) => {
@@ -65,6 +65,22 @@ export const getStopsList = (route) => {
       label: e.label,
     };
   });
+};
+
+export const getSameRoute = (route) => {
+  let found = [];
+  if(route == null) return []
+  Object.entries(store.state.busList).forEach(([co, val]) => {
+    if (co != route.co.toLocaleLowerCase()) {
+      val.forEach((e) => {
+        if (e.route == route.route) {
+          found.push({ label: e.label, value: e });
+        }
+      });
+    }
+  });
+
+  return found;
 };
 
 export const path = (main, last, ...object) => {
