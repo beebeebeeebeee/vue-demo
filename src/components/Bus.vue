@@ -34,6 +34,10 @@
     <n-card size="small" v-for="(item, i) in selected" :key="i" closable @close="remove(i)">
         <template #header>
             <span @click="collapse(i)">
+                <n-icon size="16">
+                    <caret-down-sharp v-if="item.collapse"/>
+                    <caret-up-sharp v-else/>
+                </n-icon>
                 {{item.route}}
             </span>
         </template>
@@ -66,7 +70,9 @@
 <script>
 import {
     Add,
-    Refresh
+    Refresh,
+    CaretDownSharp,
+    CaretUpSharp
 } from "@vicons/ionicons5";
 import DataServices from "@/service/DataServices.js";
 import {
@@ -82,6 +88,8 @@ export default {
     components: {
         Add,
         Refresh,
+        CaretDownSharp,
+        CaretUpSharp
     },
     data() {
         return {
@@ -156,10 +164,10 @@ export default {
                 delete added.route;
                 delete added.sameRoute;
                 delete added.sameRouteStop;
-                this.$store.commit("addSelected", added);
-                this.formData.route = null;
+                this.$store.commit("addSelected", added)
+                if (added.success) this.formData.route = null;
+                this.setSelected();
             }
-            this.setSelected();
         },
         remove: function (index) {
             this.$store.commit("removeSelected", index);
@@ -186,7 +194,9 @@ export default {
                             eta = [...eta, ...await DataServices.getETA(oo.value)]
                         }
                     }
-                    eta.sort((a,b)=>{return a.left - b.left})
+                    eta.sort((a, b) => {
+                        return a.left - b.left
+                    })
                     allLeft.push(
                         eta[0] ? (eta[0].left > 0 ? eta[0].left : 99999999) : 99999999
                     );
@@ -203,7 +213,9 @@ export default {
                     }
                 }
 
-                eta.sort((a,b)=>{return a.left - b.left})
+                eta.sort((a, b) => {
+                    return a.left - b.left
+                })
                 allLeft.push(
                     eta[0] ? (eta[0].left > 0 ? eta[0].left : 99999999) : 99999999
                 );

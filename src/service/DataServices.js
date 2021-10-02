@@ -102,6 +102,7 @@ export default new (class {
 
     routeStop = await Promise.all(
       routeStop.map(async (e) => {
+        e.bound = e.dir
         let name = (
           await axios.get(process.env["VUE_APP_NAME_" + route.co] + e.stop)
         ).data.data;
@@ -140,7 +141,7 @@ export default new (class {
     let data = (await axios.get(api)).data.data;
     return data
       .filter((f) => {
-        return (f.dir == e.bound || f.dir == e.dir);
+        return f.dir == e.bound;
       })
       .map((e) => {
         let time = new Date(e.eta).getTime();

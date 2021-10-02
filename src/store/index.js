@@ -13,7 +13,7 @@ import localforage from "localforage";
 const store = createStore({
   // the state
   state: {
-    version: "1A0005",
+    version: "1A0006",
 
     lang: "zhHK",
     timerSwitch: true,
@@ -61,13 +61,14 @@ const store = createStore({
       if (
         state.selected.find(
           (e) =>
-            e.routeStop.route == val.routeStop.route &&
-            e.routeStop.bound == val.routeStop.bound &&
-            e.routeStop.service_type == val.routeStop.service_type &&
-            e.routeStop.seq == val.routeStop.seq
+            e.routeStop[0].route == val.routeStop[0].route &&
+            e.routeStop[0].bound == val.routeStop[0].bound &&
+            e.routeStop[0].service_type == val.routeStop[0].service_type &&
+            e.routeStop[0].seq == val.routeStop[0].seq
         ) == null
       ) {
         state.selected.push(JSON.parse(JSON.stringify(val)));
+        val.success = true;
       }
     },
     removeSelected(state, index) {
