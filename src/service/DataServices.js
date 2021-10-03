@@ -143,7 +143,7 @@ export default new (class {
       .filter((f) => {
         return f.dir == e.bound;
       }).filter((j)=>{
-        return j.rmk_tc == "";
+        return j.eta != "";
       })
       .map((e) => {
         let time = new Date(e.eta).getTime();
