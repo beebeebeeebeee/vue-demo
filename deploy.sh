@@ -1,3 +1,4 @@
+yarn build
 cd dist
 git init 
 git add -A
