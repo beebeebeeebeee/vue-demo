@@ -45,6 +45,7 @@ export default {
     // this place is define the data (state) on this component
     data() {
         return {
+            version: "1.0.7",
             loading: null,
             // this is the stuff for naive-ui darkTheme!
             darkTheme,

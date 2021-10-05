@@ -39,9 +39,9 @@ export const getBusList = () => {
       label: co,
       key: co,
       children: val.map((e) => {
-        e.label = `[${e.co}] ${e.route} ${
+        e.label = `[${i18n.global.t(e.co)}] ${e["route_" + lang[store.state.lang]]?e["route_" + lang[store.state.lang]]:e.route}. ${
           e["orig_" + lang[store.state.lang]]
-        }>${e["dest_" + lang[store.state.lang]]}`;
+        } > ${e["dest_" + lang[store.state.lang]]}`;
         return {
           value: e,
           label: e.label,
