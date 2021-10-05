@@ -121,8 +121,7 @@ export const getLocalForage = async () => {
   if (state && state.version == store.state.version) {
     store.replaceState(state);
   } else if(state && state.version.substr(0,3) == store.state.version.substr(0,3)){
-    store.replaceState(state);
-    store.commit("setVersion", state.version);
+    store.commit("setVersion", store.state.version);
     store.commit("setLastUpdBusList", null);
     store.commit("setLastUpdStopsList", null);
   }else {
