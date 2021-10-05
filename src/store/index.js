@@ -13,7 +13,7 @@ import localforage from "localforage";
 const store = createStore({
   // the state
   state: {
-    version: "1A07",
+    version: "1A08",
 
     lang: "zhHK",
     timerSwitch: true,

@@ -146,8 +146,8 @@ export default {
                     added.co.push(added.sameRoute.co);
                     added.routeStop.push(added.sameRouteStop)
                 }
-                added.label_en = `${added.route.route_en}. ${added.route.orig_en} > ${added.route.dest_en}`
-                added.label_tc = `${added.route.route_tc}. ${added.route.orig_tc} > ${added.route.dest_tc}`
+                added.label_en = `${added.route.route_en || added.route.route}. ${added.route.orig_en} > ${added.route.dest_en}`
+                added.label_tc = `${added.route.route_tc || added.route.route}. ${added.route.orig_tc} > ${added.route.dest_tc}`
 
                 added.prev2 = [];
                 for (
