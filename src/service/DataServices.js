@@ -150,10 +150,9 @@ export default new (class {
         break;
     }
     let data = (await axios.get(api)).data.data;
-
     if (e.co == "MTR") {
       data = Object.entries(data)[0][1][e.bound].map((j) => {
-        return { co: e.co, dir: e.bound, eta: j.time };
+        return { co: e.co, dir: e.bound, eta: j.time.replace(/ /g,"T") };
       });
     }
 
