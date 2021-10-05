@@ -2,7 +2,7 @@
     "lang": "中文",
 
     "mode.dark": "深色模式",
-    "mode.light": "浅色模式",
+    "mode.light": "淺色模式",
 
     "loading": "加載中",
 
@@ -19,5 +19,8 @@
 
     "KMB": "九巴",
     "NWFB": "新巴",
-    "CTB": "城巴"
+    "CTB": "城巴",
+
+    "status.1": "即將到達",
+    "status.2": "可能已經離開"
 }

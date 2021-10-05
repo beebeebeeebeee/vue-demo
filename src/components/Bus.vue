@@ -35,8 +35,8 @@
         <template #header>
             <span @click="collapse(i)">
                 <n-icon size="16">
-                    <caret-down-sharp v-if="item.collapse"/>
-                    <caret-up-sharp v-else/>
+                    <caret-down-sharp v-if="item.collapse" />
+                    <caret-up-sharp v-else />
                 </n-icon>
                 {{item.route}}
             </span>
@@ -53,7 +53,7 @@
                         {{this.$t('status.no_bus')}}
                     </template>
                     <n-timeline>
-                        <n-timeline-item type="success" :title="formatLeft(eta.left - refreshCountup)" :time="formatTime(eta.time) + ` ${this.$t(eta.co)}`" v-for="(eta, k) in item.eta" :key="k" />
+                        <n-timeline-item type="success" :title=" formatLeft(eta.left - refreshCountup)" :time="formatTime(eta.time) + ` ${this.$t(eta.co)}`" v-for="(eta, k) in item.eta" :key="k" />
                     </n-timeline>
                 </template>
             </n-step>
@@ -252,6 +252,25 @@ export default {
         },
         "$store.state.lang": function () {
             this.setSelected();
+        },
+        "refreshCountup": function (refreshCountup) {
+            this.selected.forEach(e => {
+                let allLeft = [];
+                for (let m in e.prev2) {
+                    let left = e.prev2[m].eta[0] ? (e.prev2[m].eta[0].left - refreshCountup) : 99999999
+                    allLeft.push(
+                        left > 0 ? left : 99999999
+                    );
+                }
+                let cuurentLeft = e[0] ? (e[0].left - refreshCountup) : 99999999
+                allLeft.push(
+                    cuurentLeft > 0 ? cuurentLeft : 99999999
+                );
+                this.selected.location= {
+                    allLeft,
+                    seq: allLeft.indexOf(Math.min(...allLeft)) + 1
+                }
+            })
         }
     },
     // the data is computed

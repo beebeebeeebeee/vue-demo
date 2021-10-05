@@ -6,6 +6,8 @@ import store from "@/store";
 
 import DataServices from "./DataServices";
 
+import i18n from "@/i18n"
+
 //const
 export const lang = {
   zhHK: "tc",
@@ -14,10 +16,12 @@ export const lang = {
 
 //functions
 export const formatLeft = (eta) => {
-  eta = eta / 1000 / 60;
+  let message = eta < 0 ? `${i18n.global.t('status.2') }` : eta <60000? `${i18n.global.t('status.1') }`: "";
+  let sign = eta >= 0 ? "" : "-"
+  eta = Math.abs(eta) / 1000 / 60;
   let mm = Math.floor(eta);
   let ss = `${Math.floor((eta - mm) * 60)}`.padStart(2, "0");
-  return `${mm}:${ss}`;
+  return `${message} ${sign}${mm}:${ss}`;
 };
 
 export const formatTime = (time) => {

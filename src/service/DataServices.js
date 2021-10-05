@@ -148,13 +148,13 @@ export default new (class {
       .map((e) => {
         let time = new Date(e.eta).getTime();
         let left = time - new Date();
-        let message = left < 0 ? -1 : left < 60000 ? 1 : 0;
         return {
           co: e.co,
           time,
           left,
-          message,
         };
+      }).filter((n)=>{
+        return n.left > (-60000 * 5);
       });
   }
 })();

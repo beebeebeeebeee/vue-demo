@@ -19,5 +19,8 @@
 
     "KMB": "KMB",
     "NWFB": "NWFB",
-    "CTB": "CTB"
+    "CTB": "CTB",
+
+    "status.1": "About to arrive",
+    "status.2": "May have already left"
 }

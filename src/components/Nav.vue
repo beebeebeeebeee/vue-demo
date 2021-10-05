@@ -1,10 +1,10 @@
 <template>
-<n-grid x-gap="12" :cols="3">
+<n-grid x-gap="12" :cols="3" >
     <n-gi>
         EZBus
     </n-gi>
     <n-gi :span="2">
-        <n-space justify="end">
+        <n-space justify="end" align="start">
             <n-switch v-model:value="timerSwitch" />
             <n-dropdown trigger="hover" @select="changeLang" :options="options">
                 <n-button>{{$t("lang")}}</n-button>
@@ -49,3 +49,9 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+.n-grid {
+    align-items: center;
+}
+</style>
