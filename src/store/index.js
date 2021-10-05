@@ -35,6 +35,9 @@ const store = createStore({
   // or you can also just set it normally
   // ex. this.$store.busList = "abc" or store.busList = "abc"
   mutations: {
+    setVersion(state,val){
+      state.version = val
+    },
     setLang(state, val) {
       state.lang = val;
     },
