@@ -120,7 +120,11 @@ export const getLocalForage = async () => {
   const state = await localforage.getItem("state");
   if (state && state.version == store.state.version) {
     store.replaceState(state);
-  } else {
+  } else if(state && state.version.substr(0,3) == store.state.version.substr(0,3)){
+    store.replaceState(state);
+    store.commit("setLastUpdBusList", null);
+    store.commit("setLastUpdStopsList", null);
+  }else {
     localforage.setItem("state", JSON.parse(JSON.stringify(store.state)));
   }
 };
