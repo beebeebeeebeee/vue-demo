@@ -20,7 +20,7 @@
             </n-button>
         </n-space>
     </n-card>
-    <n-button color="#ff69b4" style="width: 100%" @click="setSelected">
+    <n-button color="#ff69b4" style="width: 100%" @click="setSelected" :loading="loading">
         <template #icon>
             <n-icon>
                 <refresh />
@@ -38,22 +38,23 @@
                     <caret-down-sharp v-if="item.collapse" />
                     <caret-up-sharp v-else />
                 </n-icon>
-                {{item.route}}
+                {{ item.route }}
             </span>
         </template>
         <n-steps vertical size="small" :current="item.location.seq" :status="'process'" v-if="!item.collapse">
             <n-step :title="prev.label" :description="
             prev.eta[0]
-              ? formatLeft(prev.eta[0].left - refreshCountup)+ ` ${this.$t(prev.eta[0].co)}`
+              ? formatLeft(prev.eta[0].left - refreshCountup) +
+                ` ${this.$t(prev.eta[0].co)} ${getLangRmk(prev.eta[0])}`
               : this.$t('status.no_bus')
           " v-for="(prev, j) in item.prev2" :key="j" />
             <n-step :title="item.stop">
                 <template #default>
-                    <template v-if="item.eta.length==0">
-                        {{this.$t('status.no_bus')}}
+                    <template v-if="item.eta.length == 0">
+                        {{ this.$t("status.no_bus") }}
                     </template>
                     <n-timeline>
-                        <n-timeline-item type="success" :title=" formatLeft(eta.left - refreshCountup)" :time="formatTime(eta.time) + ` ${this.$t(eta.co)}`" v-for="(eta, k) in item.eta" :key="k" />
+                        <n-timeline-item type="success" :title="formatLeft(eta.left - refreshCountup)" :time="formatTime(eta.time) + ` ${this.$t(eta.co)} ${getLangRmk(eta)}`" v-for="(eta, k) in item.eta" :key="k" />
                     </n-timeline>
                 </template>
             </n-step>
@@ -82,6 +83,7 @@ import {
     getBusList,
     getStopsList,
     getSameRoute,
+    getLangRmk
 } from "@/service/Utils.js";
 
 export default {
@@ -89,15 +91,19 @@ export default {
         Add,
         Refresh,
         CaretDownSharp,
-        CaretUpSharp
+        CaretUpSharp,
     },
     data() {
         return {
+            loading: false,
+
             formatLeft,
             formatTime,
+            getLangRmk,
 
             refreshCountdown: process.env.VUE_APP_REFRESH_COUNTDOWN,
             refreshCountup: 0,
+            refreshTime: new Date(),
 
             sameRoute: [],
 
@@ -124,7 +130,11 @@ export default {
 
         this.timer = setInterval(() => {
             this.refreshCountup += 1000;
-            if (this.timerSwitch) {
+            // if the device pause and re-open
+            if (new Date() - this.refreshTime > 5000) this.setSelected();
+
+            this.refreshTime = new Date();
+            if (this.timerSwitch && !this.loading) {
                 if (this.refreshCountdown > 0) {
                     this.refreshCountdown--;
                 } else {
@@ -136,35 +146,39 @@ export default {
     // the functions for this component
     methods: {
         add: function () {
-            if (this.formData.routeStop != "" && this.formData.routeStop != null) {
+            if (this.formData.routeStop != "" && this.formData.routeStop != null && (this.formData.sameRoute == "" || this.formData.sameRoute == null || (this.formData.sameRoute != "" & this.formData.sameRoute != null && this.formData.sameRouteStop != "" & this.formData.sameRouteStop != null))) {
                 let added = JSON.parse(JSON.stringify(this.formData));
 
-                added.collapse = false
-                added.co = [added.route.co]
-                added.routeStop = [added.routeStop]
+                added.collapse = false;
+                added.co = [added.route.co];
+                added.routeStop = [added.routeStop];
                 if (added.sameRoute) {
                     added.co.push(added.sameRoute.co);
-                    added.routeStop.push(added.sameRouteStop)
+                    added.routeStop.push(added.sameRouteStop);
                 }
-                added.label_en = `${added.route.route_en || added.route.route}. ${added.route.orig_en} > ${added.route.dest_en}`
-                added.label_tc = `${added.route.route_tc || added.route.route}. ${added.route.orig_tc} > ${added.route.dest_tc}`
+                added.label_en = `${added.route.route_en || added.route.route}. ${
+          added.route.orig_en
+        } > ${added.route.dest_en}`;
+                added.label_tc = `${added.route.route_tc || added.route.route}. ${
+          added.route.orig_tc
+        } > ${added.route.dest_tc}`;
 
                 added.prev2 = [];
                 for (
                     let i = this.formData.routeStop.seq - 1; this.formData.routeStop.seq - 3 < i && i > 0; i--
                 ) {
-                    let toBeAdded = [this.stopsList.find((e) => e.value.seq == i)]
-                    if (added.sameRoute) toBeAdded.push(this.sameRouteStopList.find((e) => e.value.seq == i))
-                    added.prev2 = [
-                        toBeAdded,
-                        ...added.prev2,
-                    ];
+                    let toBeAdded = [this.stopsList.find((e) => e.value.seq == i)];
+                    if (added.sameRoute)
+                        toBeAdded.push(
+                            this.sameRouteStopList.find((e) => e.value.seq == i)
+                        );
+                    added.prev2 = [toBeAdded, ...added.prev2];
                 }
 
                 delete added.route;
                 delete added.sameRoute;
                 delete added.sameRouteStop;
-                this.$store.commit("addSelected", added)
+                this.$store.commit("addSelected", added);
                 if (added.success) this.formData.route = null;
                 this.setSelected();
             }
@@ -178,6 +192,8 @@ export default {
             this.setSelected();
         },
         setSelected: async function () {
+            this.loading = true;
+
             let a = [];
 
             for (let j in this.$store.state.selected) {
@@ -186,17 +202,17 @@ export default {
                 let allLeft = [];
                 let eta = [];
                 for (let m in e.prev2) {
-                    let k = e.prev2[m]
-                    let eta = []
+                    let k = e.prev2[m];
+                    let eta = [];
                     if (!e.collapse) {
                         for (let o in k) {
-                            let oo = k[o]
-                            eta = [...eta, ...await DataServices.getETA(oo.value)]
+                            let oo = k[o];
+                            eta = [...eta, ...(await DataServices.getETA(oo.value))];
                         }
                     }
                     eta.sort((a, b) => {
-                        return a.left - b.left
-                    })
+                        return a.left - b.left;
+                    });
                     allLeft.push(
                         eta[0] ? (eta[0].left > 0 ? eta[0].left : 99999999) : 99999999
                     );
@@ -208,19 +224,21 @@ export default {
                 }
                 if (!e.collapse) {
                     for (let o in e.routeStop) {
-                        let oo = e.routeStop[o]
-                        eta = [...eta, ...await DataServices.getETA(oo)]
+                        let oo = e.routeStop[o];
+                        eta = [...eta, ...(await DataServices.getETA(oo))];
                     }
                 }
 
                 eta.sort((a, b) => {
-                    return a.left - b.left
-                })
+                    return a.left - b.left;
+                });
                 allLeft.push(
                     eta[0] ? (eta[0].left > 0 ? eta[0].left : 99999999) : 99999999
                 );
 
-                let label = e.co.map(k => "[" + this.$t(k) + "]").join(" ") + ` ${e["label_" + lang[this.$store.state.lang]]}`
+                let label =
+                    e.co.map((k) => "[" + this.$t(k) + "]").join(" ") +
+                    ` ${e["label_" + lang[this.$store.state.lang]]}`;
 
                 a.push({
                     collapse: e.collapse,
@@ -240,6 +258,7 @@ export default {
             this.selected = a;
             this.refreshCountup = 0;
             this.refreshCountdown = process.env.VUE_APP_REFRESH_COUNTDOWN;
+            this.loading = false;
         },
     },
     // is the key (formData.route in this case) has changes do the function
@@ -253,25 +272,23 @@ export default {
         "$store.state.lang": function () {
             this.setSelected();
         },
-        "refreshCountup": function (refreshCountup) {
-            this.selected.forEach(e => {
+        refreshCountup: function (refreshCountup) {
+            this.selected.forEach((e) => {
                 let allLeft = [];
                 for (let m in e.prev2) {
-                    let left = e.prev2[m].eta[0] ? (e.prev2[m].eta[0].left - refreshCountup) : 99999999
-                    allLeft.push(
-                        left > 0 ? left : 99999999
-                    );
+                    let left = e.prev2[m].eta[0] ?
+                        e.prev2[m].eta[0].left - refreshCountup :
+                        99999999;
+                    allLeft.push(left > 0 ? left : 99999999);
                 }
-                let cuurentLeft = e[0] ? (e[0].left - refreshCountup) : 99999999
-                allLeft.push(
-                    cuurentLeft > 0 ? cuurentLeft : 99999999
-                );
-                this.selected.location= {
+                let cuurentLeft = e[0] ? e[0].left - refreshCountup : 99999999;
+                allLeft.push(cuurentLeft > 0 ? cuurentLeft : 99999999);
+                this.selected.location = {
                     allLeft,
-                    seq: allLeft.indexOf(Math.min(...allLeft)) + 1
-                }
-            })
-        }
+                    seq: allLeft.indexOf(Math.min(...allLeft)) + 1,
+                };
+            });
+        },
     },
     // the data is computed
     // usually use for getting store state

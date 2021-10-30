@@ -115,6 +115,10 @@ export const merge = (left, right) => {
   return [...arr, ...left, ...right];
 };
 
+export const getLangRmk = (eta) => {
+  return eta["rmk_" + lang[store.state.lang]]
+}
+
 import localforage from "localforage";
 export const getLocalForage = async () => {
   const state = await localforage.getItem("state");
