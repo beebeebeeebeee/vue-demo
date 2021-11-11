@@ -15,7 +15,9 @@ export const lang = {
 };
 
 //functions
-export const formatLeft = (eta) => {
+export const formatLeft = (time, dummy) => {
+  (dummy)
+  let eta = time - new Date()
   let message = eta < 0 ? `${i18n.global.t('status.2') }` : eta <60000? `${i18n.global.t('status.1') }`: "";
   let sign = eta >= 0 ? "" : "-"
   eta = Math.abs(eta) / 1000 / 60;
@@ -116,7 +118,7 @@ export const merge = (left, right) => {
 };
 
 export const getLangRmk = (eta) => {
-  return eta["rmk_" + lang[store.state.lang]]
+  return eta["rmk_" + lang[store.state.lang]] || ""
 }
 
 import localforage from "localforage";

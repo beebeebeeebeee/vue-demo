@@ -44,7 +44,7 @@
         <n-steps vertical size="small" :current="item.location.seq" :status="'process'" v-if="!item.collapse">
             <n-step :title="prev.label" :description="
             prev.eta[0]
-              ? formatLeft(prev.eta[0].left - refreshCountup) +
+              ? formatLeft(prev.eta[0].time,refreshCountup) +
                 ` ${this.$t(prev.eta[0].co)} ${getLangRmk(prev.eta[0])}`
               : this.$t('status.no_bus')
           " v-for="(prev, j) in item.prev2" :key="j" />
@@ -54,7 +54,7 @@
                         {{ this.$t("status.no_bus") }}
                     </template>
                     <n-timeline>
-                        <n-timeline-item type="success" :title="formatLeft(eta.left - refreshCountup)" :time="formatTime(eta.time) + ` ${this.$t(eta.co)} ${getLangRmk(eta)}`" v-for="(eta, k) in item.eta" :key="k" />
+                        <n-timeline-item type="success" :title="formatLeft(eta.time,refreshCountup)" :time="formatTime(eta.time) + ` ${this.$t(eta.co)} ${getLangRmk(eta)}`" v-for="(eta, k) in item.eta" :key="k" />
                     </n-timeline>
                 </template>
             </n-step>
@@ -158,10 +158,10 @@ export default {
                 }
                 added.label_en = `${added.route.route_en || added.route.route}. ${
           added.route.orig_en
-        } > ${added.route.dest_en}`;
+        } > ${added.route.dest_en} - ${added.routeStop[0].name_en}`;
                 added.label_tc = `${added.route.route_tc || added.route.route}. ${
           added.route.orig_tc
-        } > ${added.route.dest_tc}`;
+        } > ${added.route.dest_tc} - ${added.routeStop[0].name_tc}`;
 
                 added.prev2 = [];
                 for (

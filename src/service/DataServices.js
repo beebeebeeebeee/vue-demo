@@ -165,19 +165,17 @@ export default new (class {
       })
       .map((e) => {
         let time = new Date(e.eta).getTime();
-        let left = time - new Date();
         
         return {
           co: e.co,
           time,
-          left,
           rmk_tc: e.rmk_tc,
           rmk_sc: e.rmk_sc,
           rmk_en: e.rmk_en,
         };
       })
       .filter((n) => {
-        return n.left > -60000 * 5;
+        return (n.time - new Date()) > -60000 * 5;
       });
   }
 })();
