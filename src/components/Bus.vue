@@ -211,10 +211,10 @@ export default {
                         }
                     }
                     eta.sort((a, b) => {
-                        return a.left - b.left;
+                        return a.time - b.time;
                     });
                     allLeft.push(
-                        eta[0] ? (eta[0].left > 0 ? eta[0].left : 99999999) : 99999999
+                        eta[0] ? ((eta[0].time - new Date()) > 0 ? (eta[0].time - new Date()) : 99999999) : 99999999
                     );
                     prev2.push({
                         seq: k[0].value.seq,
@@ -230,10 +230,10 @@ export default {
                 }
 
                 eta.sort((a, b) => {
-                    return a.left - b.left;
+                    return a.time - b.time;
                 });
                 allLeft.push(
-                    eta[0] ? (eta[0].left > 0 ? eta[0].left : 99999999) : 99999999
+                    eta[0] ? ((eta[0].time - new Date()) > 0 ? (eta[0].time - new Date()) : 99999999) : 99999999
                 );
 
                 let label =
@@ -277,7 +277,7 @@ export default {
                 let allLeft = [];
                 for (let m in e.prev2) {
                     let left = e.prev2[m].eta[0] ?
-                        e.prev2[m].eta[0].left - refreshCountup :
+                        (e.prev2[m].eta[0].left - new Date()) - refreshCountup :
                         99999999;
                     allLeft.push(left > 0 ? left : 99999999);
                 }
